@@ -1,149 +1,119 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  Play, 
-  RotateCcw, 
-  BookOpen, 
-  CheckSquare, 
-  ArrowRight,
-  List,
-  Trophy,
-  Factory,
-  BarChart3
-} from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+// npm install lucide-react firebase
 
-// --- データ定義 (全14問: スマート問題集 2-5 原価計算) ---
+import React, { useState, useEffect } from 'react';
+import { Check, X, Home, ChevronRight, BookOpen, Clock, AlertTriangle, Play, RefreshCw, BarChart2 } from 'lucide-react';
+import { initializeApp } from "firebase/app";
+import { getAuth, signInAnonymously } from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
-const problemData = [
+// ==========================================
+// Firebase Configuration (環境変数を使用)
+// ==========================================
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+};
+
+let app, auth, db;
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch (error) {
+  console.error("Firebase initialization error:", error);
+}
+
+const APP_ID = "QuizApp_02_05_CostAccounting";
+
+// ==========================================
+// Quiz Data
+// ==========================================
+const quizData = [
   {
     id: 1,
-    category: "原価の構成",
-    question: "次の式の空欄Ａ、Ｂに入る用語の組み合わせとして、最も適切なものはどれか。\n（　Ａ　）＝ 販売費及び一般管理費 ＋（　Ｂ　）",
+    title: "原価計算の概要 原価の構成",
+    question: "次の式の空欄A、Bに入る用語の組み合わせとして、最も適切なものを下記の解答群から選べ。\n（ A ）＝ 販売費及び一般管理費 ＋（ B ）",
     options: [
-      "Ａ：製造原価　Ｂ：直接経費",
-      "Ａ：製造原価　Ｂ：直接労務費",
-      "Ａ：総原価　Ｂ：製造原価",
-      "Ａ：製造直接費　Ｂ：直接労務費"
+      "A：製造原価　B：直接経費",
+      "A：製造原価　B：直接労務費",
+      "A：総原価　B：製造原価",
+      "A：製造直接費　B：直接労務費"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      <p class="text-sm mb-2">原価の階層構造を理解しましょう。</p>
-      <div class="bg-blue-50 p-3 rounded text-xs space-y-1">
-        <p><strong>製造原価：</strong> 製品の製造にかかった原価（材料費＋労務費＋経費）</p>
-        <p><strong>総原価：</strong> 製造原価 ＋ 販売費及び一般管理費（販管費）</p>
-      </div>
-      <p class="mt-2 text-xs italic text-gray-600">※販売価格は、総原価に営業利益を足したものです。</p>
-    `
+    answer: 2,
+    explanation: "【解答】ウ\n原価の構成について問われています。原価は大きく「製造原価」と「販売費及び一般管理費」に分類されます。\n・製造原価：製品の製造にかかった原価です。\n・販売費及び一般管理費：販売活動と管理活動にかかった原価です。\n・総原価：製造原価と販売費及び一般管理費を合計して、総原価と呼びます。よって、A：総原価、B：製造原価となります。"
   },
   {
     id: 2,
-    category: "製造原価の分類",
-    question: "原価発生の形態によって、原価要素は（　Ａ　）に属する各費目に分類される。また製品に対する原価発生の態様との関連によって、原価要素は（　Ｂ　）とに分類される。空欄に入る組み合わせを選べ。",
+    title: "原価計算の概要 製造原価の分類",
+    question: "文章は、製造原価要素の分類について述べたものである。空欄A、Bに入る語句の組み合わせとして、最も適切なものを下記の解答群から選べ。\n原価発生の形態によって、原価要素は（ A ）に属する各費目に分類される。また製品に対する原価発生の態様との関連によって、原価要素は（ B ）とに分類される。",
     options: [
-      "Ａ：固定費、変動費　Ｂ：直接費と間接費",
-      "Ａ：直接費と間接費　Ｂ：材料費、労務費、経費",
-      "Ａ：材料費、労務費、経費　Ｂ：直接費と間接費",
-      "Ａ：材料費、労務費、経費　Ｂ：固定費、変動費"
+      "A：固定費、変動費　B：直接費と間接費",
+      "A：直接費と間接費　B：材料費、労務費、経費",
+      "A：材料費、労務費、経費　B：直接費と間接費",
+      "A：材料費、労務費、経費　B：固定費、変動費"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      <div class="space-y-2 text-sm">
-        <p><strong>形態別分類(A)：</strong> 財務会計上の発生に基づき「材料費」「労務費」「経費」に分けます。</p>
-        <p><strong>製品との関連(B)：</strong> 特定の製品にいくらかかったか明確なものを「直接費」、明確でないものを「間接費」に分けます。</p>
-      </div>
-    `
+    answer: 2,
+    explanation: "【解答】ウ\n製造原価の分類について問われています。\n・費目別の分類（原価発生の形態による分類）：材料費、労務費、経費に分類されます。\n・製品との関連における分類（原価発生の態様による分類）：特定の製品にいくらかかったかが明確にわかる「製造直接費」と、明確ではない「製造間接費」に分類されます。"
   },
   {
     id: 3,
-    category: "非原価項目",
-    question: "原価計算上、原価に算入されないもの（非原価項目）として、最も不適切なものはどれか。",
+    title: "非原価項目",
+    question: "原価計算上、原価に算入されないものとして、最も不適切なものはどれか。",
     options: [
       "支払利息などの財務費用は、原価に算入されない。",
       "異常な棚卸減耗は、原価に算入されない。",
       "工場の機械にかかる固定資産税は、原価に算入されない。",
       "法人税や所得税は、原価に算入されない。"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      <p class="text-sm mb-2"><strong>ウ ×：</strong> 工場の機械にかかる固定資産税は「製造原価（経費）」として原価に算入されます。</p>
-      <div class="text-xs text-gray-600">
-        <p>● 算入されない項目：財務費用（支払利息）、異常な状態による損失（火災・盗難等）、法人税等、利益剰余金に関する項目（配当など）。</p>
-      </div>
-    `
+    answer: 2,
+    explanation: "【解答】ウ\n工場の機械にかかる固定資産税は「製造原価」として原価に算入されます。したがって「算入されない」とする記述は不適切です。\n・ア：支払利息などの財務費用は、経営目的に関連しない価値の減少に該当し非原価項目です。\n・イ：異常な棚卸減耗は、異常な状態を原因とする価値の減少に該当し非原価項目です。\n・エ：法人税や所得税は、その他の利益剰余金に課する項目に該当し非原価項目です。"
   },
   {
     id: 4,
-    category: "製造原価報告書",
-    question: "製造原価報告書の構造において、空欄Ａ～Ｄに入る組み合わせとして適切なものを選べ。\n\nⅠ ( Ａ ) ＋ Ⅱ ( Ｂ ) ＋ Ⅲ 経費 ＝ ( Ｃ )\n( Ｃ ) ＋ 期首仕掛品 － 期末仕掛品 ＝ ( Ｄ )",
+    title: "製造原価報告書",
+    question: "製造原価報告書について、空欄A～Dに入る組み合わせとして、最も適切なものはどれか。\nⅠ ( A )\n  1 期首材料棚卸高\n  2 当期材料仕入高\nⅡ ( B )\n  1 賃金\n  2 法定福利費\nⅢ 経費\n( C )\n期首仕掛品棚卸高\n期末仕掛品棚卸高\n( D )",
     options: [
-      "Ａ：材料費　Ｂ：経費　Ｃ：当期総製造費用　Ｄ：当期製品製造原価",
-      "Ａ：材料費　Ｂ：労務費　Ｃ：当期総製造費用　Ｄ：当期製品製造原価",
-      "Ａ：材料費　Ｂ：労務費　Ｃ：当期製品製造原価　Ｄ：当期総製造費用",
-      "Ａ：経費　Ｂ：労務費　Ｃ：当期総製造費用　Ｄ：当期製品製造原価"
+      "A：材料費 B：経費 C：当期総製造費用 D：当期製品製造原価",
+      "A：材料費 B：労務費 C：当期総製造費用 D：当期製品製造原価",
+      "A：材料費 B：労務費 C：当期製品製造原価 D：当期総製造費用",
+      "A：経費 B：労務費 C：当期総製造費用 D：当期製品製造原価"
     ],
-    correctAnswer: 1,
-    explanation: `
-      <p class="font-bold mb-2">正解：イ</p>
-      <div class="bg-gray-100 p-2 rounded text-xs space-y-1">
-        <p><strong>当期総製造費用(C)：</strong> 当期に投入した「材料費(A)＋労務費(B)＋経費」の合計。</p>
-        <p><strong>当期製品製造原価(D)：</strong> 完成した製品の原価。「総製造費用 ＋ 期首仕掛品 － 期末仕掛品」で計算。</p>
-      </div>
-    `
+    answer: 1,
+    explanation: "【解答】イ\n製造原価報告書の上部には、インプットの材料費、労務費、経費が表示されます。次に、これらのインプットを合計した「当期総製造費用」が計算されます。そして、一番下に「当期製品製造原価」が表示されます。\n当期総製造費用 ＝ 材料費 ＋ 労務費 ＋ 経費\n当期製品製造原価 ＝ 当期総製造費用 ＋ 期首仕掛品 ‐ 期末仕掛品"
   },
   {
     id: 5,
-    category: "個別原価計算の基礎",
+    title: "個別原価計算1",
     question: "個別原価計算に関する説明として、最も不適切なものはどれか。",
     options: [
-      "製造間接費は、合理的な賦課基準に従って各製造指図書に賦課する。",
+      "製造間接費は、合理的な賦課基準に従って各製造指図書に賦課する。賦課というのは、全体の費用を、ある基準で各製造指図書に割り振ることをいう。",
       "個別原価計算は、個別の注文ごとに生産する受注生産形態が採用されている。",
       "個別原価計算は、間接材料費、間接労務費、間接経費をまとめて計算する。",
       "製造間接費は一定の配賦基準に従い、各製造指図書に費用を配賦する。"
     ],
-    correctAnswer: 0,
-    explanation: `
-      <p class="font-bold mb-2">正解：ア</p>
-      <p class="text-sm mb-2"><strong>ア ×：</strong> 賦課ではなく「配賦」の説明です。</p>
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div class="border p-1"><strong>賦課：</strong>直接製品に負担させること。</div>
-        <div class="border p-1"><strong>配賦：</strong>全体の費用を基準で割り振ること。</div>
-      </div>
-      <p class="text-xs mt-2 italic text-blue-600">※製造「間接」費は割り振る必要があるため「配賦」を行います。</p>
-    `
+    answer: 0,
+    explanation: "【解答】ア\n「賦課」というのは、かかった費用を直接製品に負担させることをいいます。全体の費用を、ある基準で各製造指図書に割り振ることは「配賦」といいます。よってアの記述は不適切です。\n個別原価計算では、製造直接費は特定の製造指図書に「賦課」し、製造間接費は一定の基準に従って「配賦」します。"
   },
   {
     id: 6,
-    category: "個別原価計算の計算",
-    question: "A社は個別原価計算を採用。状況は以下の通り。\n・#91, #92：当月完成\n・#93：当月着手、未完成（前月繰越0）\n・製造間接費合計 8,000を直接材料費と直接労務費の合計(1:3:4)で配賦する。\n当月の製品製造原価(完成分)と月末仕掛品(未完成分)を求めよ。(単位：千円)",
+    title: "個別原価計算2",
+    question: "直接材料費と直接労務費の合計額に基づいて製造間接費を配賦するとき、当月の製品製造原価と月末仕掛品の組み合わせとして、最も適切なものを選べ。\n【製造状況】\n#91: 前月着手、当月完成 (材料費300, 労務費700, 前月繰越3,500)\n#92: 前月着手、当月完成 (労務費2,000, 製造間接費3,000)\n#93: 当月着手、当月未完成 (材料費1,700, 製造間接費4,000)\n合計: 前月繰越7,000, 材料費3,000, 労務費5,000",
     options: [
       "製品製造原価 15,000　月末仕掛品 8,000",
       "製品製造原価 11,500　月末仕掛品 11,500",
       "製品製造原価 5,500　月末仕掛品 17,500",
       "製品製造原価 17,500　月末仕掛品 5,500"
     ],
-    correctAnswer: 0,
-    explanation: `
-      <p class="font-bold mb-2">正解：ア</p>
-      <div class="text-xs space-y-1">
-        <p><strong>1. 製造間接費の配賦：</strong> 合計8,000を#91(1,000), #92(3,000), #93(4,000)に配分。</p>
-        <p><strong>2. 完成品(#91, #92)の原価：</strong></p>
-        <p>#91：3,500(繰越)＋300＋700＋1,000 ＝ 5,500</p>
-        <p>#92：3,500(繰越)＋1,000＋2,000＋3,000 ＝ 9,500</p>
-        <p>→ 5,500 ＋ 9,500 ＝ <strong>15,000</strong></p>
-        <p><strong>3. 未完成(#93)の原価：</strong></p>
-        <p>0 ＋ 1,700 ＋ 2,300 ＋ 4,000 ＝ <strong>8,000</strong></p>
-      </div>
-    `
+    answer: 0,
+    explanation: "【解答】ア\n未完成の#93が月末仕掛品、完成した#91と#92が製品製造原価となります。\n前月繰越の合計が7,000、#91が3,500、#93は当月着手なので0。よって#92は3,500。\n同様に差し引きで表を埋めると：\n#91合計＝5,500、#92合計＝9,500、#93合計＝8,000。\n製品製造原価 ＝ #91(5,500) ＋ #92(9,500) ＝ 15,000。\n月末仕掛品 ＝ #93(8,000)。"
   },
   {
     id: 7,
-    category: "総合原価計算の基礎",
+    title: "総合原価計算1",
     question: "総合原価計算に関する説明として、最も不適切なものはどれか。",
     options: [
       "総合原価計算では、直接材料費、加工費に分類して計算する。",
@@ -151,402 +121,559 @@ const problemData = [
       "加工費は加工の進捗度に比例して発生する。",
       "当期投入数量は、完成品から期末仕掛品を控除して求めることができる。"
     ],
-    correctAnswer: 3,
-    explanation: `
-      <p class="font-bold mb-2">正解：エ</p>
-      <p class="text-sm"><strong>エ ×：</strong> 当期投入数量 ＝ <strong>完成品 ＋ 期末仕掛品 － 期首仕掛品</strong> です。</p>
-      <p class="text-xs mt-2">● 加工費：直接労務費、直接経費、製造間接費の合計。進捗度に合わせて発生します。</p>
-    `
+    answer: 3,
+    explanation: "【解答】エ\n当期投入数量は、「当期投入数量 ＝ 完成品 ＋ 期末仕掛品 － 期首仕掛品」で求められます。よって完成品から期末仕掛品を控除して求めるという記述は不適切です。"
   },
   {
     id: 8,
-    category: "総合原価計算の計算",
-    question: "大量生産の甲製品。月初仕掛品0kg。当月投入1,000kg。完成品600kg、月末仕掛品400kg(進捗度50%)。材料は始点投入。当月費用：材料10,000、加工8,000。完成品原価を求めよ。",
+    title: "総合原価計算2",
+    question: "甲製品を単一工程で大量生産している。材料はすべて工程の始点で投入。当月分の完成品原価はいくらか。\n当月投入1,000kg, 月末仕掛品400kg(50%), 完成品600kg。\n当月製造費用：直接材料費10,000千円、加工費8,000千円。月初仕掛品はゼロ。",
     options: [
       "10,000千円",
       "10,800千円",
       "12,000千円",
       "18,000千円"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      <div class="text-xs space-y-2">
-        <p><strong>1. 直接材料費：</strong> 10,000 ÷ (600＋400) × 600 ＝ <strong>6,000</strong></p>
-        <p><strong>2. 加工費：</strong> 8,000 ÷ (600 ＋ 400×0.5) × 600<br/>＝ 8,000 ÷ 800 × 600 ＝ <strong>6,000</strong></p>
-        <p><strong>3. 合計：</strong> 6,000 ＋ 6,000 ＝ <strong>12,000</strong></p>
-      </div>
-    `
+    answer: 2,
+    explanation: "【解答】ウ\n直接材料費の単価：10,000千円 ÷ (完成品600kg ＋ 月末仕掛品400kg) ＝ 10千円/kg\n直接材料費完成品原価：10千円 × 600kg ＝ 6,000千円\n加工費の月末仕掛品換算量：400kg × 50% ＝ 200kg\n加工費の単価：8,000千円 ÷ (完成品600kg ＋ 月末仕掛品200kg) ＝ 10千円/kg\n加工費完成品原価：10千円 × 600kg ＝ 6,000千円\n完成品原価 ＝ 6,000 ＋ 6,000 ＝ 12,000千円"
   },
   {
     id: 9,
-    category: "仕掛品の評価方法",
-    question: "直接材料費について、先入先出法(A)と平均法(B)で月末仕掛品原価を求めよ。\n月初：1,000個(435,000円)、当月投入：6,000個(2,400,000円)、完成：5,000個、月末：2,000個。材料は始点投入。",
+    title: "総合原価計算 期末仕掛品の原価",
+    question: "甲製品の製造。材料は始点投入。月末仕掛品の直接材料費は、先入先出法で行うときはA、平均法で行うときはBになる。\n月初仕掛品 1,000個 (材料費 435,000)\n当月投入 6,000個 (材料費 2,400,000)\n月末仕掛品 2,000個 (50%)\n完成品 5,000個",
     options: [
-      "Ａ：800,000円　Ｂ：810,000円",
-      "Ａ：835,000円　Ｂ：810,000円",
-      "Ａ：800,000円　Ｂ：800,000円",
-      "Ａ：835,000円　Ｂ：800,000円"
+      "A：800,000円　B：810,000円",
+      "A：835,000円　B：810,000円",
+      "A：800,000円　B：800,000円",
+      "A：835,000円　B：800,000円"
     ],
-    correctAnswer: 0,
-    explanation: `
-      <p class="font-bold mb-2">正解：ア</p>
-      <div class="text-xs space-y-2">
-        <p><strong>A. 先入先出法：</strong> 月末仕掛品は「当月投入分」から成ると考える。<br/>2,400,000 ÷ 6,000 × 2,000 ＝ <strong>800,000</strong></p>
-        <p><strong>B. 平均法：</strong> 月初と当月を平均した単価を使う。<br/>(435,000 ＋ 2,400,000) ÷ (1,000 ＋ 6,000) ＝ 405円<br/>405 × 2,000 ＝ <strong>810,000</strong></p>
-      </div>
-    `
+    answer: 0,
+    explanation: "【解答】ア\n・先入先出法：月末仕掛品は当月投入分から構成されると考えます。当月投入分単価＝2,400,000÷6,000＝400円。月末仕掛品＝400円×2,000個＝800,000円(A)。\n・平均法：月初と当月の平均単価を求めます。(435,000＋2,400,000)÷(1,000＋6,000)＝405円。月末仕掛品＝405円×2,000個＝810,000円(B)。"
   },
   {
     id: 10,
-    category: "標準原価：材料差異",
-    question: "標準材料費：5kg×＠20 ＝ 100。実際：400kg×＠22 ＝ 8,800。投入個数：90個。直接材料費差異(合計)を求めよ。",
+    title: "標準原価計算1 直接材料費の差異分析",
+    question: "直接材料費差異を計算せよ。材料は始点投入。\n① 標準：5kg×＠20千円＝100千円\n② 実際：400kg×＠22千円＝8,800千円\n③ 生産数量：月初10個、月末30個、完成品70個",
     options: [
       "800千円（有利差異）",
       "800千円（不利差異）",
       "200千円（有利差異）",
       "200千円（不利差異）"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      <div class="text-xs space-y-1">
-        <p><strong>数量差異：</strong> 20 × (5×90 － 400) ＝ 1,000(有利)</p>
-        <p><strong>価格差異：</strong> (20 － 22) × 400 ＝ △800(不利)</p>
-        <p><strong>合計：</strong> 1,000 － 800 ＝ <strong>200(有利)</strong></p>
-      </div>
-      <p class="text-xs mt-1 italic text-blue-600">※標準より安く、または少なく済めば「有利」です。</p>
-    `
+    answer: 2,
+    explanation: "【解答】ウ\n当月投入個数 ＝ 70 ＋ 30 － 10 ＝ 90個\n標準消費量 ＝ 5kg × 90個 ＝ 450kg\n数量差異 ＝ ＠20千円 × (450kg － 400kg) ＝ ＋1,000千円(有利)\n価格差異 ＝ (＠20千円 － ＠22千円) × 400kg ＝ －800千円(不利)\n直接材料費差異 ＝ 1,000 － 800 ＝ 200千円(有利差異)"
   },
   {
     id: 11,
-    category: "標準原価：労務費差異",
-    question: "標準：1,300円/時 × 190時間。実際：1,200円/時 × 220時間。直接労務費差異(合計)を求めよ。",
+    title: "標準原価計算2 直接労務費の差異分析",
+    question: "直接労務費差異を計算せよ。\n標準：賃率1,300円/時間、作業時間190時間\n実際：賃率1,200円/時間、作業時間220時間",
     options: [
       "22,000円（有利差異）",
       "22,000円（不利差異）",
       "17,000円（有利差異）",
       "17,000円（不利差異）"
     ],
-    correctAnswer: 3,
-    explanation: `
-      <p class="font-bold mb-2">正解：エ</p>
-      <div class="text-xs space-y-1">
-        <p><strong>時間差異：</strong> 1,300 × (190 － 220) ＝ △39,000(不利)</p>
-        <p><strong>賃率差異：</strong> (1,300 － 1,200) × 220 ＝ 22,000(有利)</p>
-        <p><strong>合計：</strong> △39,000 ＋ 22,000 ＝ <strong>△17,000(不利)</strong></p>
-      </div>
-    `
+    answer: 3,
+    explanation: "【解答】エ\n時間差異 ＝ 標準賃率1,300円 × (標準190時間 － 実際220時間) ＝ －39,000円(不利)\n賃率差異 ＝ (標準1,300円 － 実際1,200円) × 実際220時間 ＝ ＋22,000円(有利)\n直接労務費差異 ＝ －39,000 ＋ 22,000 ＝ －17,000円(不利差異)"
   },
   {
     id: 12,
-    category: "製造間接費の分析",
-    question: "シュラッター・シュラッター図の空欄①～④に入る組み合わせを選べ。\n① 角度部分　② 実際発生額と予算許容額の差　③ 予算許容額の線と実際操業度の交点付近　④ 右端の底辺部分",
+    title: "製造間接費",
+    question: "公式法変動予算（シュラッター・シュラッター法）の図における空欄①～④に入る語句の組み合わせを選べ。\n①原点からの傾き（変動費部分）\n②実際操業度の線と変動予算線の差のうち、予算線上と実際発生額との差\n③右肩上がりの線の総称などに関連する部分（この説明文は仮です。正しくは「予算差異」等の位置）\n④基準操業度における固定費の高さ",
     options: [
       "①変動費差異　②能率費差異（変動費）　③予算差異　④固定費実際発生額",
       "①変動費差異　②能率費差異（変動費）　③固定費差異　④固定費予算",
       "①変動費率　②製造間接費実際発生額　③予算差異　④固定費予算",
       "①変動費率　②能率費差異（変動費）　③変動費差異　④固定費実際発生額"
     ],
-    correctAnswer: 2,
-    explanation: `
-      <p class="font-bold mb-2">正解：ウ</p>
-      <p class="text-sm mb-2">シュラッター図の位置関係を整理しましょう。</p>
-      <ul class="text-xs space-y-1">
-        <li><strong>① 変動費率：</strong> 斜線の傾き。</li>
-        <li><strong>③ 予算差異：</strong> 実際発生額と「予算許容額（固定費予算＋変動費率×実際操業度）」の差。</li>
-        <li><strong>④ 固定費予算：</strong> グラフの縦軸（切片）部分。</li>
-      </ul>
-    `
+    answer: 2,
+    explanation: "【解答】ウ\nシュラッター図において、原点からの傾き①は「変動費率」を示します。\n縦軸の高さを示す②は「製造間接費実際発生額」です。\n実際発生額と予算許容額との差③は「予算差異」です。\n固定費の総額を示す④は「固定費予算」です。"
   },
   {
     id: 13,
-    category: "直接原価計算",
-    question: "直接原価計算では費用を( A )( B )に分解する。売上高から変動売上原価を引いたものを( C )、さらに変動販売費を引いたものを( D )という。空欄に入る組み合わせを選べ。",
+    title: "直接原価計算",
+    question: "直接原価計算とは製造にかかった費用を、（ A ）、（ B ）に分解する。また販売にかかった費用も（ A ）、（ B ）に分解する。売上高から変動売上原価を引いたものを（ C ）という。そして（ C ）から変動販売費を引いたものを（ D ）という。",
     options: [
-      "Ａ：変動費　Ｂ：固定費　Ｃ：限界利益　Ｄ：変動製造マージン",
-      "Ａ：変動費　Ｂ：固定費　Ｃ：変動製造マージン　Ｄ：限界利益",
-      "Ａ：直接費　Ｂ：間接費　Ｃ：売上総利益　Ｄ：限界利益",
-      "Ａ：直接費　Ｂ：間接費　Ｃ：変動製造マージン　Ｄ：限界利益"
+      "A：変動費 B：固定費 C：限界利益 D：変動製造マージン",
+      "A：変動費 B：固定費 C：変動製造マージン D：限界利益",
+      "A：直接費 B：間接費 C：売上総利益 D：限界利益",
+      "A：直接費 B：間接費 C：変動製造マージン D：限界利益"
     ],
-    correctAnswer: 1,
-    explanation: `
-      <p class="font-bold mb-2">正解：イ</p>
-      <div class="bg-blue-50 p-2 rounded text-xs space-y-1">
-        <p><strong>変動製造マージン(C)：</strong> 売上高 － 変動売上原価</p>
-        <p><strong>限界利益(D)：</strong> 変動製造マージン － 変動販売費（＝売上高 － 全変動費）</p>
-      </div>
-    `
+    answer: 1,
+    explanation: "【解答】イ\n直接原価計算は、費用を「変動費(A)」と「固定費(B)」に分解します。売上高から変動売上原価を引いた利益が「変動製造マージン(C)」です。「変動製造マージン」から変動販売費を引いたものが「限界利益(D)」になります。限界利益は、売上高からすべての変動費を引いたものです。"
   },
   {
     id: 14,
-    category: "限界利益と営業利益",
-    question: "売上 5,000,000。変動製造費 2,450,000、変動販売費 150,000。固定製造費 300,000、固定販売費 125,000。限界利益と営業利益を求めよ。",
+    title: "直接原価計算 限界利益と営業利益",
+    question: "直接原価計算により計算された、営業利益、限界利益の組み合わせを選べ。\n売上高：5,000,000円\n変動製造費用：2,450,000円\n固定製造費用：300,000円\n変動販売費：150,000円\n固定販売費：125,000円",
     options: [
       "営業利益 2,250,000　限界利益 1,975,000",
       "営業利益 1,975,000　限界利益 2,250,000",
       "営業利益 2,400,000　限界利益 1,975,000",
       "営業利益 1,975,000　限界利益 2,400,000"
     ],
-    correctAnswer: 3,
-    explanation: `
-      <p class="font-bold mb-2">正解：エ</p>
-      <div class="text-xs space-y-2">
-        <p><strong>1. 限界利益：</strong> 5,000,000 － (2,450,000＋150,000) ＝ <strong>2,400,000</strong></p>
-        <p><strong>2. 営業利益：</strong> 2,400,000 － (300,000＋125,000) ＝ <strong>1,975,000</strong></p>
-      </div>
-    `
+    answer: 3,
+    explanation: "【解答】エ\n限界利益 ＝ 売上高 － すべての変動費\n限界利益 ＝ 5,000,000 － 2,450,000 － 150,000 ＝ 2,400,000円\n営業利益 ＝ 限界利益 － すべての固定費\n営業利益 ＝ 2,400,000 － 300,000 － 125,000 ＝ 1,975,000円"
   }
 ];
 
-// --- コンポーネント実装 ---
-
+// ==========================================
+// Main Application Component
+// ==========================================
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('menu'); 
-  const [quizMode, setQuizMode] = useState('all'); 
-  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
-  const [filteredProblems, setFilteredProblems] = useState([]);
-  const [userAnswers, setUserAnswers] = useState({}); 
-  const [reviewFlags, setReviewFlags] = useState({}); 
-  const [showExplanation, setShowExplanation] = useState(false);
+  const [authKey, setAuthKey] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  const [userData, setUserData] = useState({
+    wrongList: [],
+    reviewList: [],
+    progressIndex: 0,
+    progressMode: ""
+  });
+
+  const [activeQuestions, setActiveQuestions] = useState([]);
+  const [currentMode, setCurrentMode] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  
+  const [showHistory, setShowHistory] = useState(false);
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
 
-  useEffect(() => {
-    const savedAnswers = JSON.parse(localStorage.getItem('smart_quiz_2_5_answers')) || {};
-    const savedReviews = JSON.parse(localStorage.getItem('smart_quiz_2_5_reviews')) || {};
-    setUserAnswers(savedAnswers);
-    setReviewFlags(savedReviews);
-  }, []);
+  // ------------------------------------------
+  // Firebase Data Handling
+  // ------------------------------------------
+  const handleLogin = async () => {
+    if (!authKey.trim()) {
+      alert("合言葉を入力してください");
+      return;
+    }
+    setLoading(true);
+    try {
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+      
+      const docRef = doc(db, APP_ID, authKey);
+      const docSnap = await getDoc(docRef);
+      
+      let fetchedData = { wrongList: [], reviewList: [], progressIndex: 0, progressMode: "" };
+      if (docSnap.exists()) {
+        fetchedData = { ...fetchedData, ...docSnap.data() };
+      } else {
+        await setDoc(docRef, fetchedData);
+      }
+      
+      console.log("Data loaded:", fetchedData);
+      setUserData(fetchedData);
+      setIsLoggedIn(true);
 
-  useEffect(() => {
-    localStorage.setItem('smart_quiz_2_5_answers', JSON.stringify(userAnswers));
-    localStorage.setItem('smart_quiz_2_5_reviews', JSON.stringify(reviewFlags));
-  }, [userAnswers, reviewFlags]);
+      if (fetchedData.progressIndex > 0 && fetchedData.progressMode) {
+        setShowResumeDialog(true);
+      }
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("通信エラーが発生しました。");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const startQuiz = (mode) => {
-    let targets = [];
-    if (mode === 'all') {
-      targets = problemData;
-    } else if (mode === 'wrong') {
-      targets = problemData.filter(p => userAnswers[p.id] && !userAnswers[p.id].isCorrect);
-    } else if (mode === 'review') {
-      targets = problemData.filter(p => reviewFlags[p.id]);
+  const saveData = async (newData) => {
+    try {
+      const docRef = doc(db, APP_ID, authKey);
+      await setDoc(docRef, newData, { merge: true });
+      console.log("Data saved:", newData);
+    } catch (error) {
+      console.error("Save error:", error);
+    }
+  };
+
+  // ------------------------------------------
+  // Quiz Flow Methods
+  // ------------------------------------------
+  const startMode = (mode) => {
+    let filtered = [];
+    if (mode === "all") {
+      filtered = [...quizData];
+    } else if (mode === "wrong") {
+      filtered = quizData.filter(q => userData.wrongList?.includes(q.id));
+    } else if (mode === "review") {
+      filtered = quizData.filter(q => userData.reviewList?.includes(q.id));
     }
 
-    if (targets.length === 0) {
-      alert("対象となる問題がありません。");
+    if (filtered.length === 0) {
+      alert("該当する問題がありません。");
       return;
     }
 
-    setQuizMode(mode);
-    setFilteredProblems(targets);
-    setCurrentProblemIndex(0);
-    setShowExplanation(false);
+    setActiveQuestions(filtered);
+    setCurrentMode(mode);
+    setCurrentIndex(0);
+    setIsAnswered(false);
     setSelectedOption(null);
-    setCurrentScreen('quiz');
+    setShowHistory(false);
+    setShowResumeDialog(false);
+
+    // 進捗リセット
+    const newUserData = { ...userData, progressIndex: 0, progressMode: mode };
+    setUserData(newUserData);
+    saveData({ progressIndex: 0, progressMode: mode });
   };
 
-  const handleAnswer = (optionIndex) => {
-    setSelectedOption(optionIndex);
-    const problem = filteredProblems[currentProblemIndex];
-    const isCorrect = optionIndex === problem.correctAnswer;
+  const resumeQuiz = () => {
+    let filtered = [];
+    const mode = userData.progressMode;
+    if (mode === "all") filtered = [...quizData];
+    else if (mode === "wrong") filtered = quizData.filter(q => userData.wrongList?.includes(q.id));
+    else if (mode === "review") filtered = quizData.filter(q => userData.reviewList?.includes(q.id));
+
+    if (filtered.length === 0 || userData.progressIndex >= filtered.length) {
+       // 万が一状態がおかしい場合は最初から
+       startMode("all");
+       return;
+    }
+
+    setActiveQuestions(filtered);
+    setCurrentMode(mode);
+    setCurrentIndex(userData.progressIndex);
+    setIsAnswered(false);
+    setSelectedOption(null);
+    setShowResumeDialog(false);
+  };
+
+  const resetAndStartOver = () => {
+    const newUserData = { ...userData, progressIndex: 0, progressMode: "" };
+    setUserData(newUserData);
+    saveData({ progressIndex: 0, progressMode: "" });
+    setShowResumeDialog(false);
+  };
+
+  const handleAnswer = (idx) => {
+    if (isAnswered) return;
     
-    setUserAnswers(prev => ({
-      ...prev,
-      [problem.id]: { answerIndex: optionIndex, isCorrect: isCorrect }
-    }));
-    setShowExplanation(true);
+    setSelectedOption(idx);
+    setIsAnswered(true);
+
+    const currentQ = activeQuestions[currentIndex];
+    const isCorrect = idx === currentQ.answer;
+
+    let newWrongList = [...(userData.wrongList || [])];
+    if (!isCorrect && !newWrongList.includes(currentQ.id)) {
+      newWrongList.push(currentQ.id);
+    } else if (isCorrect && newWrongList.includes(currentQ.id)) {
+      newWrongList = newWrongList.filter(id => id !== currentQ.id);
+    }
+
+    // 次に進むべきインデックスを保存
+    const nextProgressIndex = currentIndex; // とりあえず現在のインデックス（次回開いた時はここからリトライでも良いし、次へ進めても良い。ここでは現在の問題を完了したとして次に進む状態を保存するか、現在の状態を保存するか）
+    // 仕様：解答するたびにprogressIndexを保存。次の問題への遷移は「次へ」ボタンで行う。
+
+    const newUserData = { 
+      ...userData, 
+      wrongList: newWrongList,
+      progressIndex: currentIndex,
+      progressMode: currentMode
+    };
+    
+    setUserData(newUserData);
+    saveData({ wrongList: newWrongList, progressIndex: currentIndex, progressMode: currentMode });
   };
 
-  const nextProblem = () => {
-    if (currentProblemIndex < filteredProblems.length - 1) {
-      setCurrentProblemIndex(prev => prev + 1);
-      setShowExplanation(false);
+  const handleNext = () => {
+    if (currentIndex < activeQuestions.length - 1) {
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
+      setIsAnswered(false);
       setSelectedOption(null);
+      
+      const newUserData = { ...userData, progressIndex: nextIdx };
+      setUserData(newUserData);
+      saveData({ progressIndex: nextIdx });
     } else {
-      setCurrentScreen('result');
+      // 完走
+      alert("すべての問題を終了しました！");
+      const newUserData = { ...userData, progressIndex: 0, progressMode: "" };
+      setUserData(newUserData);
+      saveData({ progressIndex: 0, progressMode: "" });
+      
+      setActiveQuestions([]);
+      setCurrentMode("");
     }
   };
 
-  const toggleReview = (problemId) => {
-    setReviewFlags(prev => ({ ...prev, [problemId]: !prev[problemId] }));
+  const toggleReview = () => {
+    const currentQ = activeQuestions[currentIndex];
+    let newReviewList = [...(userData.reviewList || [])];
+    
+    if (newReviewList.includes(currentQ.id)) {
+      newReviewList = newReviewList.filter(id => id !== currentQ.id);
+    } else {
+      newReviewList.push(currentQ.id);
+    }
+    
+    const newUserData = { ...userData, reviewList: newReviewList };
+    setUserData(newUserData);
+    saveData({ reviewList: newReviewList });
   };
 
-  const stats = useMemo(() => {
-    const total = problemData.length;
-    const correctCount = Object.values(userAnswers).filter(a => a.isCorrect).length;
-    const reviewCount = Object.values(reviewFlags).filter(Boolean).length;
-    return { total, correctCount, reviewCount };
-  }, [userAnswers, reviewFlags]);
+  const goHome = () => {
+    // 途中離脱時も進捗は保存されている前提
+    setActiveQuestions([]);
+    setCurrentMode("");
+    setShowHistory(false);
+    setShowResumeDialog(false);
+  };
 
-  if (currentScreen === 'menu') {
+  // ------------------------------------------
+  // Render Helpers
+  // ------------------------------------------
+  if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 p-4 font-sans">
-        <div className="max-w-xl mx-auto space-y-6">
-          <header className="text-center py-8">
-            <div className="inline-block bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mb-1">
-              財務・会計 2-5
-            </div>
-            <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center justify-center gap-2">
-              <Factory className="w-7 h-7 text-orange-600" /> 原価計算マスター
-            </h1>
-            <p className="text-slate-400 text-xs mt-1">製造原価から標準・直接原価計算まで</p>
-          </header>
-
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
-            <h2 className="text-sm font-black mb-4 w-full flex items-center gap-2 text-slate-600">
-              <Trophy className="w-4 h-4 text-yellow-500" /> 学習進捗
-            </h2>
-            <div className="w-44 h-44 relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: '正解', value: stats.correctCount },
-                      { name: '未クリア', value: stats.total - stats.correctCount },
-                    ]}
-                    cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={4} dataKey="value" stroke="none"
-                  >
-                    <Cell fill="#f97316" />
-                    <Cell fill="#f1f5f9" />
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-black text-slate-800">{Math.round((stats.correctCount/stats.total)*100)}%</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-center mt-4 w-full border-t border-slate-50 pt-4">
-              <div>
-                <p className="text-xl font-black text-orange-600">{stats.correctCount}<span className="text-xs text-slate-300">/{stats.total}</span></p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Solved</p>
-              </div>
-              <div>
-                <p className="text-xl font-black text-orange-400">{stats.reviewCount}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Review</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3">
-            <button onClick={() => startQuiz('all')} className="flex items-center justify-between p-6 bg-slate-900 text-white rounded-3xl shadow-xl hover:bg-black transition active:scale-95">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/10 p-2 rounded-xl"><Play className="w-6 h-6" /></div>
-                <div className="text-left"><div className="font-black">全問題を解く</div><div className="text-[10px] opacity-50 font-bold tracking-wider">合計 14問</div></div>
-              </div>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => startQuiz('wrong')} className="p-4 bg-white border border-slate-100 text-red-600 rounded-3xl font-black text-xs flex flex-col items-center gap-2 hover:bg-red-50 transition active:scale-95">
-                <RotateCcw className="w-4 h-4" /> 弱点補強
-              </button>
-              <button onClick={() => startQuiz('review')} className="p-4 bg-white border border-slate-100 text-orange-600 rounded-3xl font-black text-xs flex flex-col items-center gap-2 hover:bg-orange-50 transition active:scale-95">
-                <CheckSquare className="w-4 h-4" /> 復習リスト
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 text-gray-700">
+        <RefreshCw className="animate-spin w-10 h-10 mr-3 text-blue-500" />
+        <span className="text-xl font-bold">Loading...</span>
       </div>
     );
   }
 
-  if (currentScreen === 'quiz') {
-    const problem = filteredProblems[currentProblemIndex];
-    const progress = ((currentProblemIndex + 1) / filteredProblems.length) * 100;
-
+  if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 pb-20 font-sans">
-        <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 border-b border-slate-100">
-          <div className="h-1 bg-slate-100"><div className="h-full bg-orange-500 transition-all duration-500" style={{ width: `${progress}%` }}></div></div>
-          <div className="flex items-center justify-between p-4 max-w-2xl mx-auto">
-            <button onClick={() => setCurrentScreen('menu')} className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quit</button>
-            <div className="font-black text-slate-700 text-sm">Q.{currentProblemIndex + 1} <span className="text-slate-300">/</span> {filteredProblems.length}</div>
-            <div className="text-[10px] font-black px-2 py-1 bg-orange-50 rounded text-orange-600 uppercase tracking-wider">{problem.category}</div>
-          </div>
-        </div>
-
-        <div className="max-w-2xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4">
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-            <p className="text-md font-bold leading-relaxed whitespace-pre-wrap">{problem.question}</p>
-          </div>
-
-          <div className="grid gap-3">
-            {problem.options.map((opt, idx) => {
-              let btnClass = "p-5 text-left rounded-3xl border-2 transition-all flex items-center gap-4 text-sm ";
-              if (showExplanation) {
-                if (idx === problem.correctAnswer) btnClass += "bg-green-50 border-green-500 text-green-700 font-bold";
-                else if (idx === selectedOption) btnClass += "bg-red-50 border-red-500 text-red-700 opacity-70";
-                else btnClass += "bg-white border-transparent opacity-30 shadow-none";
-              } else {
-                btnClass += "bg-white border-transparent shadow-sm hover:border-slate-200 active:scale-[0.98] font-medium";
-              }
-              return (
-                <button key={idx} disabled={showExplanation} onClick={() => handleAnswer(idx)} className={btnClass}>
-                  <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${showExplanation && idx === problem.correctAnswer ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                    {['ア','イ','ウ','エ'][idx]}
-                  </span>
-                  <span className="flex-1">{opt}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {showExplanation && (
-            <div className="space-y-4 animate-in zoom-in-95 duration-300">
-              <div className={`p-6 rounded-3xl border shadow-sm ${selectedOption === problem.correctAnswer ? 'bg-white border-green-100' : 'bg-white border-red-100'}`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-1.5 rounded-full ${selectedOption === problem.correctAnswer ? 'bg-green-500' : 'bg-red-500'} text-white`}>
-                    {selectedOption === problem.correctAnswer ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                  </div>
-                  <div className={`text-lg font-black ${selectedOption === problem.correctAnswer ? 'text-green-700' : 'text-red-700'}`}>
-                    {selectedOption === problem.correctAnswer ? '正解です！' : '残念...'}
-                  </div>
-                </div>
-                <div className="text-sm leading-relaxed text-slate-600 bg-slate-50/50 p-4 rounded-2xl border border-slate-50" dangerouslySetInnerHTML={{ __html: problem.explanation }} />
-                
-                <label className="flex items-center gap-3 mt-4 p-3 bg-white border border-orange-50 rounded-2xl cursor-pointer shadow-sm">
-                  <input type="checkbox" checked={!!reviewFlags[problem.id]} onChange={() => toggleReview(problem.id)} className="w-4 h-4 rounded border-slate-200 text-orange-500 focus:ring-orange-500" />
-                  <span className="text-xs font-black text-slate-500">この問題を復習リストに追加</span>
-                </label>
-              </div>
-
-              <button onClick={nextProblem} className="w-full p-6 bg-slate-900 text-white font-black rounded-3xl shadow-xl flex items-center justify-center gap-3 hover:bg-black transition active:scale-95">
-                {currentProblemIndex === filteredProblems.length - 1 ? '結果を見る' : '次の問題へ'} <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (currentScreen === 'result') {
-    const sessionCorrect = filteredProblems.filter(p => userAnswers[p.id]?.isCorrect).length;
-    const score = Math.round((sessionCorrect / filteredProblems.length) * 100);
-
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans text-white">
-        <div className="max-w-md w-full space-y-8 text-center animate-in zoom-in-90 duration-500">
-          <div className="relative inline-block">
-            <div className="w-28 h-28 bg-orange-500 rounded-full flex items-center justify-center mx-auto shadow-[0_0_40px_rgba(249,115,22,0.3)]">
-              <BarChart3 className="w-14 h-14 text-white" />
-            </div>
-            <div className="absolute -bottom-2 -right-2 bg-blue-500 px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-tighter">Completed</div>
-          </div>
-          
-          <div>
-            <h2 className="text-3xl font-black tracking-tighter mb-2 italic uppercase">Mission Done!</h2>
-            <div className="text-7xl font-black mb-4 tracking-tighter text-orange-500">{score}<span className="text-3xl font-bold text-white ml-1">%</span></div>
-            <p className="text-slate-400 font-black tracking-widest uppercase text-xs">Score: {sessionCorrect} / {filteredProblems.length}</p>
-          </div>
-
-          <button onClick={() => setCurrentScreen('menu')} className="w-full p-6 bg-white text-slate-900 font-black rounded-3xl shadow-xl hover:bg-slate-100 transition active:scale-95">
-            メニューに戻る
+      <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
+        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+          <BookOpen className="w-16 h-16 mx-auto mb-4 text-blue-600" />
+          <h1 className="text-2xl font-bold mb-2 text-gray-800">原価計算 スマート問題集</h1>
+          <p className="text-gray-500 mb-6 text-sm">合言葉を入力して学習データを同期します</p>
+          <input
+            type="text"
+            className="w-full border-2 border-gray-200 p-3 rounded-lg focus:outline-none focus:border-blue-500 mb-4"
+            placeholder="合言葉 (例: my-secret-key)"
+            value={authKey}
+            onChange={(e) => setAuthKey(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+          />
+          <button
+            onClick={handleLogin}
+            className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition"
+          >
+            ログインして開始
           </button>
         </div>
       </div>
     );
   }
 
-  return null;
+  // 履歴画面
+  if (showHistory) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 pb-20">
+        <header className="flex justify-between items-center mb-6 bg-white p-4 shadow-sm rounded-lg">
+          <h1 className="text-xl font-bold text-gray-800 flex items-center">
+            <BarChart2 className="w-6 h-6 mr-2 text-blue-600" />
+            学習履歴
+          </h1>
+          <button onClick={goHome} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
+            <Home className="w-5 h-5 text-gray-600" />
+          </button>
+        </header>
+
+        <div className="bg-white rounded-lg shadow-sm p-4 overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-100 text-gray-600 text-sm">
+                <th className="p-3 border-b">No.</th>
+                <th className="p-3 border-b">問題タイトル</th>
+                <th className="p-3 border-b text-center">状態</th>
+                <th className="p-3 border-b text-center">要復習</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quizData.map((q) => {
+                const isWrong = userData.wrongList?.includes(q.id);
+                const isReview = userData.reviewList?.includes(q.id);
+                return (
+                  <tr key={q.id} className="border-b last:border-0 hover:bg-gray-50">
+                    <td className="p-3 text-gray-500">{q.id}</td>
+                    <td className="p-3 font-medium text-gray-800">{q.title}</td>
+                    <td className="p-3 text-center">
+                      {isWrong ? (
+                        <span className="inline-block px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">不正解</span>
+                      ) : (
+                        <span className="inline-block px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">クリア</span>
+                      )}
+                    </td>
+                    <td className="p-3 text-center">
+                      {isReview && <AlertTriangle className="w-5 h-5 text-yellow-500 inline-block" />}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
+  // 再開ダイアログ
+  if (showResumeDialog) {
+    const modeName = userData.progressMode === "all" ? "すべての問題" : userData.progressMode === "wrong" ? "前回不正解のみ" : "要復習のみ";
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+          <Clock className="w-16 h-16 mx-auto mb-4 text-blue-600" />
+          <h2 className="text-xl font-bold mb-4 text-gray-800">学習の続きから再開しますか？</h2>
+          <p className="text-gray-600 mb-6 bg-gray-100 p-3 rounded text-sm text-left">
+            モード: <strong>{modeName}</strong><br/>
+            進捗: <strong>問題 {userData.progressIndex + 1}</strong>
+          </p>
+          <div className="space-y-3">
+            <button onClick={resumeQuiz} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg flex items-center justify-center hover:bg-blue-700">
+              <Play className="w-5 h-5 mr-2" /> 続きから再開する
+            </button>
+            <button onClick={resetAndStartOver} className="w-full bg-gray-200 text-gray-700 font-bold py-3 rounded-lg hover:bg-gray-300">
+              最初から始める
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // スタート画面
+  if (activeQuestions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 pb-20">
+        <header className="flex justify-between items-center mb-8 pt-4">
+          <h1 className="text-xl font-bold text-gray-800 flex items-center">
+            <BookOpen className="w-6 h-6 mr-2 text-blue-600" />
+            原価計算
+          </h1>
+          <button onClick={() => setShowHistory(true)} className="text-sm font-bold text-blue-600 hover:underline flex items-center">
+            <BarChart2 className="w-4 h-4 mr-1" /> 履歴
+          </button>
+        </header>
+
+        <div className="grid gap-4 max-w-md mx-auto">
+          <button onClick={() => startMode("all")} className="bg-white border-2 border-blue-500 text-blue-700 font-bold py-4 rounded-xl shadow-sm hover:bg-blue-50 transition flex items-center justify-center">
+            すべての問題 ({quizData.length}問)
+          </button>
+          
+          <button onClick={() => startMode("wrong")} className="bg-white border-2 border-red-400 text-red-600 font-bold py-4 rounded-xl shadow-sm hover:bg-red-50 transition flex items-center justify-center">
+            前回不正解の問題 ({userData.wrongList?.length || 0}問)
+          </button>
+          
+          <button onClick={() => startMode("review")} className="bg-white border-2 border-yellow-400 text-yellow-600 font-bold py-4 rounded-xl shadow-sm hover:bg-yellow-50 transition flex items-center justify-center">
+            要復習の問題 ({userData.reviewList?.length || 0}問)
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // クイズ画面
+  const currentQ = activeQuestions[currentIndex];
+  const isCorrectAnswer = selectedOption === currentQ.answer;
+  const isReview = userData.reviewList?.includes(currentQ.id);
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <header className="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-10">
+        <div className="flex items-center">
+          <button onClick={goHome} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 mr-3">
+            <Home className="w-5 h-5 text-gray-600" />
+          </button>
+          <span className="font-bold text-gray-600 text-sm">
+            問 {currentIndex + 1} / {activeQuestions.length}
+          </span>
+        </div>
+        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-bold">
+          {currentQ.title}
+        </span>
+      </header>
+
+      <main className="flex-grow p-4 max-w-2xl mx-auto w-full pb-24">
+        {/* 問題文 */}
+        <div className="bg-white p-5 rounded-xl shadow-sm mb-6 whitespace-pre-wrap leading-relaxed text-gray-800 border-l-4 border-blue-500">
+          {currentQ.question}
+        </div>
+
+        {/* 選択肢 */}
+        <div className="space-y-3">
+          {currentQ.options.map((opt, idx) => {
+            let btnClass = "w-full text-left p-4 rounded-xl border-2 transition-all font-medium text-gray-700 ";
+            
+            if (!isAnswered) {
+              btnClass += "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50";
+            } else {
+              if (idx === currentQ.answer) {
+                btnClass += "bg-green-50 border-green-500 text-green-800"; // 正解
+              } else if (idx === selectedOption) {
+                btnClass += "bg-red-50 border-red-500 text-red-800"; // 選んだ不正解
+              } else {
+                btnClass += "bg-gray-50 border-gray-200 opacity-50"; // その他
+              }
+            }
+
+            return (
+              <button
+                key={idx}
+                disabled={isAnswered}
+                onClick={() => handleAnswer(idx)}
+                className={btnClass}
+              >
+                <div className="flex justify-between items-center">
+                  <span>{opt}</span>
+                  {isAnswered && idx === currentQ.answer && <Check className="text-green-500 w-5 h-5" />}
+                  {isAnswered && idx === selectedOption && idx !== currentQ.answer && <X className="text-red-500 w-5 h-5" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 解説 */}
+        {isAnswered && (
+          <div className="mt-8 animate-fade-in-up">
+            <div className={`p-4 rounded-t-xl font-bold flex items-center ${isCorrectAnswer ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+              {isCorrectAnswer ? <Check className="w-6 h-6 mr-2" /> : <X className="w-6 h-6 mr-2" />}
+              {isCorrectAnswer ? '正解！' : '不正解...'}
+            </div>
+            <div className="bg-white p-5 rounded-b-xl shadow-sm border border-t-0 border-gray-200">
+              <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm">
+                {currentQ.explanation}
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+                <label className="flex items-center cursor-pointer text-gray-600 hover:text-yellow-600 transition">
+                  <input 
+                    type="checkbox" 
+                    className="w-5 h-5 mr-2 rounded text-yellow-500 focus:ring-yellow-500"
+                    checked={isReview || false}
+                    onChange={toggleReview}
+                  />
+                  <span className="font-bold">要復習にする</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* フローティング「次へ」ボタン */}
+      {isAnswered && (
+        <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+          <button 
+            onClick={handleNext}
+            className="w-full max-w-2xl mx-auto flex justify-center items-center bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-md"
+          >
+            {currentIndex < activeQuestions.length - 1 ? '次の問題へ' : '結果を見る'}
+            <ChevronRight className="w-5 h-5 ml-1" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
