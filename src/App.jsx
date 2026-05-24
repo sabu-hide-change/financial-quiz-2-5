@@ -30,39 +30,94 @@ try {
 const APP_ID = "QuizApp_02_05_CostAccounting";
 
 // ==========================================
-// Quiz Data
+// Quiz Data with Custom Rendered Tables/Charts
 // ==========================================
 const quizData = [
   {
     id: 1,
     title: "原価計算の概要 原価の構成",
-    question: "次の式の空欄A、Bに入る用語の組み合わせとして、最も適切なものを下記の解答群から選べ。\n（ A ）＝ 販売費及び一般管理費 ＋（ B ）",
+    question: "次の式の空欄Ａ、Ｂに入る用語の組み合わせとして、最も適切なものを下記の解答群から選べ。\n\n（ Ａ ）＝ 販売費及び一般管理費 ＋（ Ｂ ）",
     options: [
-      "A：製造原価　B：直接経費",
-      "A：製造原価　B：直接労務費",
-      "A：総原価　B：製造原価",
-      "A：製造直接費　B：直接労務費"
+      "Ａ：製造原価 Ｂ：直接経費",
+      "Ａ：製造原価 Ｂ：直接労務費",
+      "Ａ：総原価 Ｂ：製造原価",
+      "Ａ：製造直接費 Ｂ：直接労務費"
     ],
     answer: 2,
-    explanation: "【解答】ウ\n原価の構成について問われています。原価は大きく「製造原価」と「販売費及び一般管理費」に分類されます。\n・製造原価：製品の製造にかかった原価です。\n・販売費及び一般管理費：販売活動と管理活動にかかった原価です。\n・総原価：製造原価と販売費及び一般管理費を合計して、総原価と呼びます。よって、A：総原価、B：製造原価となります。"
+    renderCustomUI: () => (
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="text-center font-bold text-gray-700 mb-2">◆原価の構成概念図</div>
+        <div className="flex flex-col md:flex-row gap-1 text-center text-xs font-bold">
+          <div className="border border-gray-400 bg-green-50 p-2 flex-1">
+            <div>製造直接費</div>
+            <div className="text-[10px] text-gray-500 font-normal">（直接材料費・直接労務費・直接経費）</div>
+          </div>
+          <div className="border border-gray-400 bg-yellow-50 p-2 flex-1">
+            <div>製造間接費</div>
+            <div className="text-[10px] text-gray-500 font-normal">（間接材料費・間接労務費・間接経費）</div>
+          </div>
+          <div className="border border-gray-400 bg-blue-50 p-2 flex-1 flex items-center justify-center">
+            製造原価
+          </div>
+          <div className="border border-gray-400 bg-purple-50 p-2 flex-1 flex items-center justify-center">
+            販売費及び一般管理費
+          </div>
+        </div>
+        <div className="w-full border-t border-dashed border-gray-400 my-2"></div>
+        <div className="bg-orange-100 p-2 text-center text-sm font-bold border border-orange-300 rounded">
+          全体 ＝ 総原価
+        </div>
+      </div>
+    ),
+    explanation: "【解答】ウ\n原価を広く捉えた「総原価」は、製造活動にかかった「製造原価」と、販売・管理活動にかかった「販売費及び一般管理費」の合計で構成されます。したがって、Ａ：総原価、Ｂ：製造原価 となります。"
   },
   {
     id: 2,
     title: "原価計算の概要 製造原価の分類",
-    question: "文章は、製造原価要素の分類について述べたものである。空欄A、Bに入る語句の組み合わせとして、最も適切なものを下記の解答群から選べ。\n原価発生の形態によって、原価要素は（ A ）に属する各費目に分類される。また製品に対する原価発生の態様との関連によって、原価要素は（ B ）とに分類される。",
+    question: "文章は、製造原価要素の分類について述べたものである。空欄Ａ、Ｂに入る語句の組み合わせとして、最も適切なものを下記の解答群から選べ。\n\n原価発生の形態によって、原価要素は（ Ａ ）に属する各費目に分類される。また製品に対する原価発生の態様との関連によって、原価要素は（ Ｂ ）とに分類される。",
     options: [
-      "A：固定費、変動費　B：直接費と間接費",
-      "A：直接費と間接費　B：材料費、労務費、経費",
-      "A：材料費、労務費、経費　B：直接費と間接費",
-      "A：材料費、労務費、経費　B：固定費、変動費"
+      "Ａ：固定費、変動費 Ｂ：直接費と間接費",
+      "Ａ：直接費と間接費 Ｂ：材料費、労務費、経費",
+      "Ａ：材料費、労務費、経費 Ｂ：直接費と間接費",
+      "Ａ：材料費、労務費、経費 Ｂ：固定費、変動費"
     ],
     answer: 2,
-    explanation: "【解答】ウ\n製造原価の分類について問われています。\n・費目別の分類（原価発生の形態による分類）：材料費、労務費、経費に分類されます。\n・製品との関連における分類（原価発生の態様による分類）：特定の製品にいくらかかったかが明確にわかる「製造直接費」と、明確ではない「製造間接費」に分類されます。"
+    renderCustomUI: () => (
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full text-sm border-collapse border border-gray-300 text-center">
+          <thead>
+            <tr className="bg-gray-100 font-bold">
+              <th className="border border-gray-300 p-2">分類基準</th>
+              <th className="border border-gray-300 p-2">製造直接費</th>
+              <th className="border border-gray-300 p-2">製造間接費</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-gray-300 p-2 font-bold bg-gray-50">材料費</td>
+              <td className="border border-gray-300 p-2">直接材料費</td>
+              <td className="border border-gray-300 p-2">間接材料費</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 p-2 font-bold bg-gray-50">労務費</td>
+              <td className="border border-gray-300 p-2">直接労務費</td>
+              <td className="border border-gray-300 p-2">間接労務費</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 p-2 font-bold bg-gray-50">経費</td>
+              <td className="border border-gray-300 p-2">直接経費</td>
+              <td className="border border-gray-300 p-2">間接経費</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    ),
+    explanation: "【解答】ウ\n・原価発生の形態による分類（財務会計を基礎とするもの）＝「材料費、労務費、経費」\n・製品に対する原価発生の態様（特定の製品と紐づくか）＝「直接費と間接費」\nこの2つの軸を整理しておくことが基本です。"
   },
   {
     id: 3,
     title: "非原価項目",
-    question: "原価計算上、原価に算入されないものとして、最も不適切なものはどれか。",
+    question: "原価計算上、原価に算入されないもの（非原価項目）として、最も不適切なものはどれか。",
     options: [
       "支払利息などの財務費用は、原価に算入されない。",
       "異常な棚卸減耗は、原価に算入されない。",
@@ -70,20 +125,57 @@ const quizData = [
       "法人税や所得税は、原価に算入されない。"
     ],
     answer: 2,
-    explanation: "【解答】ウ\n工場の機械にかかる固定資産税は「製造原価」として原価に算入されます。したがって「算入されない」とする記述は不適切です。\n・ア：支払利息などの財務費用は、経営目的に関連しない価値の減少に該当し非原価項目です。\n・イ：異常な棚卸減耗は、異常な状態を原因とする価値の減少に該当し非原価項目です。\n・エ：法人税や所得税は、その他の利益剰余金に課する項目に該当し非原価項目です。"
+    explanation: "【解答】ウ\n工場の機械にかかる固定資産税は、製品を製造するために不可欠な費用（公租公課）であるため、「製造間接費（製造原価）」として原価に算入されます。したがって「算入されない」とする記述は誤り（不適切）です。\nそれ以外の支払利息（財務費用）、異常な棚卸減耗（異常な損失）、法人税（利益処分項目）はすべて原価に算入しない「非原価項目」にあたります。"
   },
   {
     id: 4,
     title: "製造原価報告書",
-    question: "製造原価報告書について、空欄A～Dに入る組み合わせとして、最も適切なものはどれか。\nⅠ ( A )\n  1 期首材料棚卸高\n  2 当期材料仕入高\nⅡ ( B )\n  1 賃金\n  2 法定福利費\nⅢ 経費\n( C )\n期首仕掛品棚卸高\n期末仕掛品棚卸高\n( D )",
+    question: "以下に掲げる製造原価報告書について、空欄Ａ～Ｄに入る組み合わせとして、最も適切なものはどれか。",
     options: [
-      "A：材料費 B：経費 C：当期総製造費用 D：当期製品製造原価",
-      "A：材料費 B：労務費 C：当期総製造費用 D：当期製品製造原価",
-      "A：材料費 B：労務費 C：当期製品製造原価 D：当期総製造費用",
-      "A：経費 B：労務費 C：当期総製造費用 D：当期製品製造原価"
+      "Ａ：材料費 Ｂ：経費 Ｃ：当期総製造費用 Ｄ：当期製品製造原価",
+      "Ａ：材料費 Ｂ：労務費 Ｃ：当期総製造費用 Ｄ：当期製品製造原価",
+      "Ａ：材料費 Ｂ：労務費 Ｃ：当期製品製造原価 Ｄ：当期総製造費用",
+      "Ａ：経費 Ｂ：労務費 Ｃ：当期総製造費用 Ｄ：当期製品製造原価"
     ],
     answer: 1,
-    explanation: "【解答】イ\n製造原価報告書の上部には、インプットの材料費、労務費、経費が表示されます。次に、これらのインプットを合計した「当期総製造費用」が計算されます。そして、一番下に「当期製品製造原価」が表示されます。\n当期総製造費用 ＝ 材料費 ＋ 労務費 ＋ 経費\n当期製品製造原価 ＝ 当期総製造費用 ＋ 期首仕掛品 ‐ 期末仕掛品"
+    renderCustomUI: () => (
+      <div className="mt-4 p-4 bg-white border border-gray-300 rounded-lg font-mono text-xs shadow-inner">
+        <div className="text-center font-bold text-sm border-b pb-2 mb-2">製造原価報告書</div>
+        <div>Ⅰ（  Ａ  ）</div>
+        <div className="pl-4">1 期首材料棚卸高    ×××</div>
+        <div className="pl-4">2 当期材料仕入高    ×××</div>
+        <div className="pl-8 border-b w-32 ml-4">合計        ×××</div>
+        <div className="pl-4">3 期末材料棚卸高    ×××</div>
+        <div className="pl-8 text-right font-bold">当期材料費： ×××</div>
+        
+        <div className="mt-2">Ⅱ（  Ｂ  ）</div>
+        <div className="pl-4">1 賃金         ×××</div>
+        <div className="pl-4">2 法定福利費      ×××</div>
+        <div className="pl-8 text-right font-bold">当期（ Ｂ ）： ×××</div>
+
+        <div className="mt-2">Ⅲ 経費</div>
+        <div className="pl-4">1 外注加工費      ×××</div>
+        <div className="pl-4">2 福利厚生費      ×××</div>
+        <div className="pl-8 text-right font-bold border-b">当期経費： ×××</div>
+
+        <div className="mt-2 pl-4 flex justify-between font-bold text-blue-700">
+          <span>（  Ｃ  ）</span><span>×××</span>
+        </div>
+        <div className="pl-4 flex justify-between">
+          <span>期首仕掛品棚卸高</span><span>×××</span>
+        </div>
+        <div className="pl-6 flex justify-between border-b w-1/2 ml-auto">
+          <span>合 計</span><span>×××</span>
+        </div>
+        <div className="pl-4 flex justify-between">
+          <span>期末仕掛品棚卸高</span><span>×××</span>
+        </div>
+        <div className="mt-1 pl-4 flex justify-between font-bold text-red-700 border-t-2 border-double border-gray-600">
+          <span>（  Ｄ  ）</span><span>×××</span>
+        </div>
+      </div>
+    ),
+    explanation: "【解答】イ\n製造原価報告書（CR）は、材料費(A)・労務費(B)・経費を当期中にどれだけ投入したかを集計し、その合計である「当期総製造費用(C)」を出します。そこに期首仕掛品を足して期末仕掛品を引くことで、当期中に完成した製品の原価である「当期製品製造原価(D)」を計算します。"
   },
   {
     id: 5,
@@ -91,25 +183,77 @@ const quizData = [
     question: "個別原価計算に関する説明として、最も不適切なものはどれか。",
     options: [
       "製造間接費は、合理的な賦課基準に従って各製造指図書に賦課する。賦課というのは、全体の費用を、ある基準で各製造指図書に割り振ることをいう。",
-      "個別原価計算は、個別の注文ごとに生産する受注生産形態が採用されている。",
+      "個別原価計算は、個別の一つの注文ごとに生産する受注生産形態が採用されている。",
       "個別原価計算は、間接材料費、間接労務費、間接経費をまとめて計算する。",
       "製造間接費は一定の配賦基準に従い、各製造指図書に費用を配賦する。"
     ],
     answer: 0,
-    explanation: "【解答】ア\n「賦課」というのは、かかった費用を直接製品に負担させることをいいます。全体の費用を、ある基準で各製造指図書に割り振ることは「配賦」といいます。よってアの記述は不適切です。\n個別原価計算では、製造直接費は特定の製造指図書に「賦課」し、製造間接費は一定の基準に従って「配賦」します。"
+    explanation: "【解答】ア\n「賦課（直課）」とは、特定の製品にかかったことが明確な費用を直接その製品に負担させることです。一方で、複数の製品に共通して発生した全体の費用を、一定の基準で各製造指図書に割り振ることは「配賦」と呼びます。選択肢アは、配賦の説明を「賦課」と書いているため不適切（誤り）です。"
   },
   {
     id: 6,
     title: "個別原価計算2",
-    question: "直接材料費と直接労務費の合計額に基づいて製造間接費を配賦するとき、当月の製品製造原価と月末仕掛品の組み合わせとして、最も適切なものを選べ。\n【製造状況】\n#91: 前月着手、当月完成 (材料費300, 労務費700, 前月繰越3,500)\n#92: 前月着手、当月完成 (労務費2,000, 製造間接費3,000)\n#93: 当月着手、当月未完成 (材料費1,700, 製造間接費4,000)\n合計: 前月繰越7,000, 材料費3,000, 労務費5,000",
+    question: "A社は個別原価計算制度を採用している。下の原価計算表の空欄を埋め、直接材料費と直接労務費の合計額に基づいて製造間接費を配賦するとき、当月の「製品製造原価」と「月末仕掛品」の組み合わせとして最も適切なものを選べ（単位：千円）。\n\n【製造状況】\n・製造指図書＃91：前月着手、当月完成\n・製造指図書＃92：前月着手、当月完成\n・製造指図書＃93：当月着手、当月未完成",
     options: [
-      "製品製造原価 15,000　月末仕掛品 8,000",
-      "製品製造原価 11,500　月末仕掛品 11,500",
-      "製品製造原価 5,500　月末仕掛品 17,500",
-      "製品製造原価 17,500　月末仕掛品 5,500"
+      "製品製造原価 15,000 月末仕掛品 8,000",
+      "製品製造原価 11,500 月末仕掛品 11,500",
+      "製品製造原価 5,500 月末仕掛品 17,500",
+      "製品製造原価 17,500 月末仕掛品 5,500"
     ],
     answer: 0,
-    explanation: "【解答】ア\n未完成の#93が月末仕掛品、完成した#91と#92が製品製造原価となります。\n前月繰越の合計が7,000、#91が3,500、#93は当月着手なので0。よって#92は3,500。\n同様に差し引きで表を埋めると：\n#91合計＝5,500、#92合計＝9,500、#93合計＝8,000。\n製品製造原価 ＝ #91(5,500) ＋ #92(9,500) ＝ 15,000。\n月末仕掛品 ＝ #93(8,000)。"
+    renderCustomUI: () => (
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full text-sm border-collapse border border-gray-400 text-center font-mono">
+          <thead>
+            <tr className="bg-orange-100 font-bold">
+              <th className="border border-gray-400 p-2">原価要素</th>
+              <th className="border border-gray-400 p-2">＃91</th>
+              <th className="border border-gray-400 p-2">＃92</th>
+              <th className="border border-gray-400 p-2">＃93</th>
+              <th className="border border-gray-400 p-2 bg-orange-200">合計</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-gray-400 p-2 font-bold bg-gray-50">前月繰越</td>
+              <td className="border border-gray-400 p-2">3,500</td>
+              <td className="border border-gray-400 p-2 bg-yellow-50 text-gray-400">（  ）</td>
+              <td className="border border-gray-400 p-2 bg-yellow-50 text-gray-400">（  ）</td>
+              <td className="border border-gray-400 p-2 font-bold">7,000</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-400 p-2 font-bold bg-gray-50">直接材料費</td>
+              <td className="border border-gray-400 p-2">300</td>
+              <td className="border border-gray-400 p-2 bg-yellow-50 text-gray-400">（  ）</td>
+              <td className="border border-gray-400 p-2">1,700</td>
+              <td className="border border-gray-400 p-2 font-bold">3,000</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-400 p-2 font-bold bg-gray-50">直接労務費</td>
+              <td className="border border-gray-400 p-2">700</td>
+              <td className="border border-gray-400 p-2">2,000</td>
+              <td className="border border-gray-400 p-2 bg-yellow-50 text-gray-400">（  ）</td>
+              <td className="border border-gray-400 p-2 font-bold">5,000</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-400 p-2 font-bold bg-gray-50">製造間接費</td>
+              <td className="border border-gray-400 p-2 bg-yellow-50 text-gray-400">（  ）</td>
+              <td className="border border-gray-400 p-2">3,000</td>
+              <td className="border border-gray-400 p-2">4,000</td>
+              <td className="border border-gray-400 p-2 bg-yellow-50 text-gray-400">（  ）</td>
+            </tr>
+            <tr className="bg-gray-100 font-bold">
+              <td className="border border-gray-400 p-2">合計</td>
+              <td className="border border-gray-400 p-2">（  ）</td>
+              <td className="border border-gray-400 p-2">（  ）</td>
+              <td className="border border-gray-400 p-2">（  ）</td>
+              <td className="border border-gray-400 p-2">（  ）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    ),
+    explanation: "【解答】ア\n1. ＃93は当月着手なので「前月繰越」は0。よって＃92の前月繰越＝7,000－3,500＝3,500。\n2. ＃92の直接材料費＝3,000－300－1,700＝1,000。\n3. ＃93の直接労務費＝5,000－700－2,000＝2,300。\n4. 製造間接費は「直接材料費＋直接労務費」に比例して配賦されます。＃92の直材＋直労＝1,000＋2,000＝3,000に対して間接費は3,000（つまり配賦率100%）。よって＃91の間接費は、直材＋直労（300＋700＝1,000）の100%なので1,000と求まります。\n5. 集計すると、完成した＃91合計＝5,500、＃92合計＝9,500。未完成の＃93合計＝8,000。製品製造原価は5,500＋9,500＝15,000、月末仕掛品は8,000となります。"
   },
   {
     id: 7,
@@ -122,12 +266,12 @@ const quizData = [
       "当期投入数量は、完成品から期末仕掛品を控除して求めることができる。"
     ],
     answer: 3,
-    explanation: "【解答】エ\n当期投入数量は、「当期投入数量 ＝ 完成品 ＋ 期末仕掛品 － 期首仕掛品」で求められます。よって完成品から期末仕掛品を控除して求めるという記述は不適切です。"
+    explanation: "【解答】エ\n総合原価計算の基本構造（ボックス図）をイメージしてください。左側（借方）の合計と右側（貸方）の合計は必ず一致します。したがって、当期投入数量は「完成品数量 ＋ 期末仕掛品数量 － 期首仕掛品数量」となります。控除（引き算）ではなく、足し算が必要なため不適切です。"
   },
   {
     id: 8,
     title: "総合原価計算2",
-    question: "甲製品を単一工程で大量生産している。材料はすべて工程の始点で投入。当月分の完成品原価はいくらか。\n当月投入1,000kg, 月末仕掛品400kg(50%), 完成品600kg。\n当月製造費用：直接材料費10,000千円、加工費8,000千円。月初仕掛品はゼロ。",
+    question: "M社は甲製品を単一工程で大量生産している。材料はすべて工程の始点で投入している。次の資料に基づき、当月分の甲製品の「完成品原価」として最も適切なものを選べ（単位：千円）。\n\n＜数量データ＞ ※（ ）内は加工進捗度\n・月初仕掛品： 0 kg\n・当月投入： 1,000 kg\n・月末仕掛品： 400 kg（50％）\n・完成品： 600 kg\n\n＜原価データ＞\n・当月製造費用：直接材料費 10,000千円 / 加工費 8,000千円",
     options: [
       "10,000千円",
       "10,800千円",
@@ -135,25 +279,64 @@ const quizData = [
       "18,000千円"
     ],
     answer: 2,
-    explanation: "【解答】ウ\n直接材料費の単価：10,000千円 ÷ (完成品600kg ＋ 月末仕掛品400kg) ＝ 10千円/kg\n直接材料費完成品原価：10千円 × 600kg ＝ 6,000千円\n加工費の月末仕掛品換算量：400kg × 50% ＝ 200kg\n加工費の単価：8,000千円 ÷ (完成品600kg ＋ 月末仕掛品200kg) ＝ 10千円/kg\n加工費完成品原価：10千円 × 600kg ＝ 6,000千円\n完成品原価 ＝ 6,000 ＋ 6,000 ＝ 12,000千円"
+    renderCustomUI: () => (
+      <div className="mt-4 p-4 bg-white border border-gray-300 rounded-lg shadow-inner">
+        <div className="text-center font-bold text-gray-700 mb-2">数量関係ボックス図（加工費は換算量に注意）</div>
+        <div className="flex border-2 border-gray-700 h-32 w-64 mx-auto text-xs font-bold font-mono">
+          <div className="w-1/2 border-r border-gray-700 flex flex-col justify-between p-1 bg-gray-50">
+            <div>月初: 0kg</div>
+            <div className="my-auto text-center bg-blue-100 p-1 border border-blue-300">当月投入:<br/>1,000kg</div>
+          </div>
+          <div className="w-1/2 flex flex-col justify-between text-right p-1">
+            <div className="h-2/3 border-b border-gray-700 bg-gray-100 p-1 flex flex-col justify-between">
+              <span>完成品:</span>
+              <span className="text-center text-sm text-blue-700">600kg</span>
+            </div>
+            <div className="h-1/3 bg-orange-100 p-1 flex flex-col justify-between">
+              <span>月末: 400kg</span>
+              <span className="text-center text-orange-700">(進捗50% = 200kg)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    explanation: "【解答】ウ\n1. 直接材料費の計算：始点投入のため月末仕掛品も100%投入済。単価＝10,000千円÷(600kg＋400kg)＝10千円。完成品直材費＝10千円×600kg＝6,000千円。\n2. 加工費の計算：加工費は進捗度を考慮した「完成品換算量」で按分します。月末換算量＝400kg×50%＝200kg。単価＝8,000千円÷(600kg＋200kg)＝10千円。完成品加工費＝10千円×600kg＝6,000千円。\n3. 合計：6,000 ＋ 6,000 ＝ 12,000千円 となります。"
   },
   {
     id: 9,
     title: "総合原価計算 期末仕掛品の原価",
-    question: "甲製品の製造。材料は始点投入。月末仕掛品の直接材料費は、先入先出法で行うときはA、平均法で行うときはBになる。\n月初仕掛品 1,000個 (材料費 435,000)\n当月投入 6,000個 (材料費 2,400,000)\n月末仕掛品 2,000個 (50%)\n完成品 5,000個",
+    question: "M社は甲製品を単一工程で大量生産している。材料はすべて工程の始点で投入している。月末仕掛品の直接材料費は、先入先出法で行うときはＡ、平均法で行うときはＢになる。空欄Ａ・Ｂに入る金額の組み合わせを選べ。\n\n＜数量データ＞ ※（ ）内は加工進捗度\n・月初仕掛品：1,000 個\n・当月投入：6,000 個\n・月末仕掛品：2,000 個（50％）\n・完成品：5,000 個\n\n＜原価データ（直接材料費のみ抜粋）＞\n・月初仕掛品：435,000 円\n・当月投入：2,400,000 円",
     options: [
-      "A：800,000円　B：810,000円",
-      "A：835,000円　B：810,000円",
-      "A：800,000円　B：800,000円",
-      "A：835,000円　B：800,000円"
+      "Ａ：800,000円 Ｂ：810,000円",
+      "Ａ：835,000円 Ｂ：810,000円",
+      "Ａ：800,000円 Ｂ：800,000円",
+      "Ａ：835,000円 Ｂ：800,000円"
     ],
     answer: 0,
-    explanation: "【解答】ア\n・先入先出法：月末仕掛品は当月投入分から構成されると考えます。当月投入分単価＝2,400,000÷6,000＝400円。月末仕掛品＝400円×2,000個＝800,000円(A)。\n・平均法：月初と当月の平均単価を求めます。(435,000＋2,400,000)÷(1,000＋6,000)＝405円。月末仕掛品＝405円×2,000個＝810,000円(B)。"
+    renderCustomUI: () => (
+      <div className="mt-4 p-4 bg-white border border-gray-300 rounded-lg shadow-inner">
+        <div className="text-center font-bold text-gray-700 mb-2">直接材料費 ボックス図（個数と金額）</div>
+        <div className="flex border-2 border-gray-700 h-36 w-72 mx-auto text-xs font-mono">
+          <div className="w-1/2 border-r border-gray-700 flex flex-col font-bold">
+            <div className="h-1/4 border-b border-gray-700 p-1 bg-yellow-50">月初: 1,000個<br/>(435,000円)</div>
+            <div className="h-3/4 p-1 bg-blue-50 flex flex-col justify-center">当月投入: 6,000個<br/>(2,400,000円)</div>
+          </div>
+          <div className="w-1/2 flex flex-col justify-between text-right font-bold">
+            <div className="h-3/5 border-b border-gray-700 bg-gray-100 p-1">完成品: 5,000個</div>
+            <div className="h-2/5 bg-orange-100 p-1 text-left flex flex-col justify-between border-l-2 border-orange-400">
+              <span className="text-right">月末仕掛品:</span>
+              <span className="text-center text-sm text-orange-700">2,000個</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    explanation: "【解答】ア\n・先入先出法(A)：月末仕掛品2,000個はすべて「当月投入分」から成ると仮定します。当月単価＝2,400,000円÷6,000個＝400円。よって、400円×2,000個＝800,000円。\n・平均法(B)：月初と当月の材料費・数量をすべて均一にブレンドして単価を出します。平均単価＝(435,000＋2,400,000)÷(1,000＋6,000)＝2,835,000÷7,000＝405円。よって、405円×2,000個＝810,000円。"
   },
   {
     id: 10,
     title: "標準原価計算1 直接材料費の差異分析",
-    question: "直接材料費差異を計算せよ。材料は始点投入。\n① 標準：5kg×＠20千円＝100千円\n② 実際：400kg×＠22千円＝8,800千円\n③ 生産数量：月初10個、月末30個、完成品70個",
+    question: "A社では標準原価計算制度を採用している。次の資料に基づいて、直接材料費差異を計算し、その金額として最も適切なものを選べ。\n\n① 直接材料費標準（製品1個あたり）： 5kg × ＠20千円 ＝ 100千円\n② 月実際直接材料費： 400kg × ＠22千円 ＝ 8,800千円\n③ 月生産数量： 月初仕掛品 10個、月末仕掛品 30個、完成品 70個",
     options: [
       "800千円（有利差異）",
       "800千円（不利差異）",
@@ -161,12 +344,35 @@ const quizData = [
       "200千円（不利差異）"
     ],
     answer: 2,
-    explanation: "【解答】ウ\n当月投入個数 ＝ 70 ＋ 30 － 10 ＝ 90個\n標準消費量 ＝ 5kg × 90個 ＝ 450kg\n数量差異 ＝ ＠20千円 × (450kg － 400kg) ＝ ＋1,000千円(有利)\n価格差異 ＝ (＠20千円 － ＠22千円) × 400kg ＝ －800千円(不利)\n直接材料費差異 ＝ 1,000 － 800 ＝ 200千円(有利差異)"
+    renderCustomUI: () => (
+      <div className="mt-4 p-4 bg-white border border-gray-300 rounded-lg shadow-inner">
+        <div className="text-center font-bold text-gray-700 mb-2">材料費差異分析ボックス（外側が実際、内側が標準）</div>
+        <div className="relative border-b-2 border-l-2 border-gray-700 w-64 h-40 mx-auto text-[10px] font-mono">
+          {/* 実際枠 */}
+          <div className="absolute bottom-0 left-0 w-48 h-32 border border-red-500 bg-red-50 opacity-40"></div>
+          {/* 標準枠 */}
+          <div className="absolute bottom-0 left-0 w-56 h-24 border border-blue-500 bg-blue-50 opacity-40"></div>
+          
+          {/* ラベル */}
+          <div className="absolute left-[-35px] top-6 font-bold text-red-600">実際 @22</div>
+          <div className="absolute left-[-35px] top-14 font-bold text-blue-600">標準 @20</div>
+          
+          <div className="absolute bottom-[-18px] left-36 font-bold text-red-600">実際 400kg</div>
+          <div className="absolute bottom-[-18px] left-48 font-bold text-blue-600">標準 450kg</div>
+
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center font-bold text-gray-700 bg-white bg-opacity-75 p-1 rounded border">
+            標準投入量 = 5kg × (70+30-10)個 = 450kg
+          </div>
+        </div>
+        <div className="text-center text-xs text-gray-500 mt-5">※横軸：消費量(kg)、縦軸：価格(千円)</div>
+      </div>
+    ),
+    explanation: "【解答】ウ\n1. 当月投入個数 ＝ 完成70 ＋ 月末30 － 月初10 ＝ 90個。\n2. 標準消費量 ＝ 5kg × 90個 ＝ 450kg。\n3. 数量差異 ＝ 標準価格＠20 × (標準450kg － 実際400kg) ＝ ＋1,000千円（消費量が少なくて済んだので有利差異）。\n4. 価格差異 ＝ (標準＠20 － 実際＠22) × 実際400kg ＝ －800千円（安く買えなかったので不利差異）。\n5. 総差異 ＝ 1,000(有利) － 800(不利) ＝ 200千円（有利差異）となります。"
   },
   {
     id: 11,
     title: "標準原価計算2 直接労務費の差異分析",
-    question: "直接労務費差異を計算せよ。\n標準：賃率1,300円/時間、作業時間190時間\n実際：賃率1,200円/時間、作業時間220時間",
+    question: "次の資料に基づき直接労務費差異（総差異）を計算し、その金額として最も適切なものを選べ。\n\n・標準：賃率 1,300円/時間、作業時間 190時間\n・実際：賃率 1,200円/時間、作業時間 220時間",
     options: [
       "22,000円（有利差異）",
       "22,000円（不利差異）",
@@ -174,46 +380,114 @@ const quizData = [
       "17,000円（不利差異）"
     ],
     answer: 3,
-    explanation: "【解答】エ\n時間差異 ＝ 標準賃率1,300円 × (標準190時間 － 実際220時間) ＝ －39,000円(不利)\n賃率差異 ＝ (標準1,300円 － 実際1,200円) × 実際220時間 ＝ ＋22,000円(有利)\n直接労務費差異 ＝ －39,000 ＋ 22,000 ＝ －17,000円(不利差異)"
+    renderCustomUI: () => (
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full text-sm border-collapse border border-gray-400 text-center font-mono mb-4">
+          <thead>
+            <tr className="bg-gray-100 font-bold">
+              <th className="border border-gray-400 p-2" rowSpan="2"></th>
+              <th className="border border-gray-400 p-2 col-span-2 bg-blue-50" colSpan="2">標準</th>
+              <th className="border border-gray-400 p-2 col-span-2 bg-red-50" colSpan="2">実際</th>
+            </tr>
+            <tr className="bg-gray-50 text-xs">
+              <th className="border border-gray-400 p-2">賃率</th>
+              <th className="border border-gray-400 p-2">作業時間</th>
+              <th className="border border-gray-400 p-2">賃率</th>
+              <th className="border border-gray-400 p-2">作業時間</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-gray-400 p-2 font-bold bg-gray-50">直接労務費</td>
+              <td className="border border-gray-400 p-2 text-blue-700 font-bold">1,300円</td>
+              <td className="border border-gray-400 p-2 text-blue-700">190時間</td>
+              <td className="border border-gray-400 p-2 text-red-700 font-bold">1,200円</td>
+              <td className="border border-gray-400 p-2 text-red-700">220時間</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    ),
+    explanation: "【解答】エ\n1. 時間差異 ＝ 標準賃率 1,300円 × (標準 190h － 実際 220h) ＝ －39,000円（時間が超過したため不利差異）。\n2. 賃率差異 ＝ (標準 1,300円 － 実際 1,200円) × 実際 220h ＝ ＋22,000円（安く雇用できたため有利差異）。\n3. 直接労務費差異 ＝ －39,000 ＋ 22,000 ＝ －17,000円（不利差異）となります。"
   },
   {
     id: 12,
     title: "製造間接費",
-    question: "公式法変動予算（シュラッター・シュラッター法）の図における空欄①～④に入る語句の組み合わせを選べ。\n①原点からの傾き（変動費部分）\n②実際操業度の線と変動予算線の差のうち、予算線上と実際発生額との差\n③右肩上がりの線の総称などに関連する部分（この説明文は仮です。正しくは「予算差異」等の位置）\n④基準操業度における固定費の高さ",
+    question: "次の「公式法変動予算（シュラッター・シュラッター法）」のグラフ図内の空欄①～④に入る語句の組み合わせとして、最も適切なものを選べ。",
     options: [
-      "①変動費差異　②能率費差異（変動費）　③予算差異　④固定費実際発生額",
-      "①変動費差異　②能率費差異（変動費）　③固定費差異　④固定費予算",
-      "①変動費率　②製造間接費実際発生額　③予算差異　④固定費予算",
-      "①変動費率　②能率費差異（変動費）　③変動費差異　④固定費実際発生額"
+      "①変動費差異 ②能率費差異（変動費） ③予算差異 ④固定費実際発生額",
+      "①変動費差異 ②能率費差異（変動費） ③固定費差異 ④固定費予算",
+      "①変動費率 ②製造間接費実際発生額 ③予算差異 ④固定費予算",
+      "①変動費率 ②能率費差異（変動費） ③変動費差異 ④固定費実際発生額"
     ],
     answer: 2,
-    explanation: "【解答】ウ\nシュラッター図において、原点からの傾き①は「変動費率」を示します。\n縦軸の高さを示す②は「製造間接費実際発生額」です。\n実際発生額と予算許容額との差③は「予算差異」です。\n固定費の総額を示す④は「固定費予算」です。"
+    renderCustomUI: () => (
+      <div className="mt-4 p-4 bg-white border border-gray-300 rounded-lg shadow-inner text-xs font-mono">
+        <div className="text-center font-bold text-gray-700 mb-2">シュラッター・シュラッター図の再現</div>
+        <div className="relative border-l-2 border-b-2 border-gray-800 w-full h-56 mx-auto pt-4">
+          
+          {/* 変動予算線 (斜め上) */}
+          <div className="absolute bottom-0 left-0 w-full h-full border-t-2 border-gray-400 origin-bottom-left rotate-[20deg] text-right pr-4 pt-1 text-gray-500">変動予算線</div>
+          {/* 固定費のベースライン */}
+          <div className="absolute bottom-16 left-0 w-full border-t border-dashed border-gray-400"></div>
+          
+          {/* 縦線ライン群 */}
+          <div className="absolute bottom-0 left-1/4 h-24 border-l border-gray-600 text-center pt-24">標準操業度</div>
+          <div className="absolute bottom-0 left-1/2 h-36 border-l-2 border-blue-600 text-center pt-36 font-bold text-blue-700">実際操業度</div>
+          <div className="absolute bottom-0 left-3/4 h-48 border-l border-gray-600 text-center pt-48">基準操業度</div>
+
+          {/* 各種空欄インジケータ */}
+          <div className="absolute bottom-2 left-2 font-bold text-purple-700 text-sm">①（角度）</div>
+          <div className="absolute top-2 left-1/2 transform translate-x-2 font-bold text-red-600">②（最上部の縦幅）</div>
+          <div className="absolute top-10 left-1/2 transform translate-x-2 font-bold text-orange-600">③（予算線と実際発生の差）</div>
+          <div className="absolute bottom-4 left-3/4 transform translate-x-2 font-bold text-green-700">④（右端底部の固定の高さ）</div>
+        </div>
+        <div className="mt-6 p-2 bg-gray-50 border rounded text-gray-600 text-[11px]">
+          ※図の位置関係を特定できるかが診断士試験でも非常に頻出のポイントです。
+        </div>
+      </div>
+    ),
+    explanation: "【解答】ウ\nシュラッター図の構造を問う定番問題です。\n① 斜め線の傾きは「変動費率」を表します。\n② 実際操業度上にプロットされた最上点の長さそのものは「製造間接費実際発生額」です。\n③ 実際発生額と予算許容額のズレを「予算差異」と呼びます。\n④ 基準操業度における固定費の枠、すなわち「固定費予算」の枠を示しています。"
   },
   {
     id: 13,
     title: "直接原価計算",
-    question: "直接原価計算とは製造にかかった費用を、（ A ）、（ B ）に分解する。また販売にかかった費用も（ A ）、（ B ）に分解する。売上高から変動売上原価を引いたものを（ C ）という。そして（ C ）から変動販売費を引いたものを（ D ）という。",
+    question: "次の文中の空欄Ａ～Ｄに入る語句の組み合わせとして、最も適切なものを下記の解答群から選べ。\n\n直接原価計算とは製造にかかった費用を、（ Ａ ）、（ Ｂ ）に分解する。また販売にかかった費用も（ Ａ ）、（ Ｂ ）に分解する。売上高から変動売上原価を引いたものを（ Ｃ ）という。そして（ Ｃ ）から変動販売費を引いたものを（ Ｄ ）という。",
     options: [
-      "A：変動費 B：固定費 C：限界利益 D：変動製造マージン",
-      "A：変動費 B：固定費 C：変動製造マージン D：限界利益",
-      "A：直接費 B：間接費 C：売上総利益 D：限界利益",
-      "A：直接費 B：間接費 C：変動製造マージン D：限界利益"
+      "Ａ：変動費 Ｂ：固定費 Ｃ：限界利益 Ｄ：変動製造マージン",
+      "Ａ：変動費 Ｂ：固定費 Ｃ：変動製造マージン Ｄ：限界利益",
+      "Ａ：直接費 Ｂ：間接費 Ｃ：売上総利益 Ｄ：限界利益",
+      "Ａ：直接費 Ｂ：間接費 Ｃ：変動製造マージン Ｄ：限界利益"
     ],
     answer: 1,
-    explanation: "【解答】イ\n直接原価計算は、費用を「変動費(A)」と「固定費(B)」に分解します。売上高から変動売上原価を引いた利益が「変動製造マージン(C)」です。「変動製造マージン」から変動販売費を引いたものが「限界利益(D)」になります。限界利益は、売上高からすべての変動費を引いたものです。"
+    renderCustomUI: () => (
+      <div className="mt-4 p-4 bg-white border border-gray-300 rounded-lg shadow-inner text-xs font-mono">
+        <div className="text-center font-bold mb-2">直接原価計算によるP/L構造</div>
+        <div className="border border-gray-400 rounded p-2 bg-gray-50 space-y-1">
+          <div className="flex justify-between border-b p-1"><span>売上高</span><span>×××</span></div>
+          <div className="flex justify-between border-b p-1 text-blue-700"><span>△ 変動売上原価</span><span>×××</span></div>
+          <div className="flex justify-between border-b p-1 bg-blue-100 font-bold"><span>＝ 空欄（ Ｃ ）</span><span>×××</span></div>
+          <div className="flex justify-between border-b p-1 text-blue-700"><span>△ 変動販売費</span><span>×××</span></div>
+          <div className="flex justify-between border-b p-1 bg-green-100 font-bold"><span>＝ 空欄（ Ｄ ）</span><span>×××</span></div>
+          <div className="flex justify-between p-1 text-red-700"><span>△ 固定費（固定製造費＋固定販管費）</span><span>×××</span></div>
+          <div className="flex justify-between border-t-2 font-bold bg-orange-100 p-1"><span>＝ 営業利益</span><span>×××</span></div>
+        </div>
+      </div>
+    ),
+    explanation: "【解答】イ\n費用を「変動費(A)」と「固定費(B)」に明確に分解するのが直接原価計算の最大の特徴です。売上高から製造の変動費だけを差し引いたものが「変動製造マージン(C)」、そこからさらに販売費の変動マージンを引いた、すべての変動費を除いた利益を「限界利益(D)」と呼びます。"
   },
   {
     id: 14,
     title: "直接原価計算 限界利益と営業利益",
-    question: "直接原価計算により計算された、営業利益、限界利益の組み合わせを選べ。\n売上高：5,000,000円\n変動製造費用：2,450,000円\n固定製造費用：300,000円\n変動販売費：150,000円\n固定販売費：125,000円",
+    question: "Y社の以下資料に基づいて、直接原価計算により計算された、「営業利益」と「限界利益」の組み合わせとして、最も適切なものを下記の解答群から選べ。\n\n・売上高： 5,000,000 円\n・変動製造費用： 2,450,000 円\n・固定製造費用： 300,000 円\n・変動販売費： 150,000 円\n・固定販売費： 125,000 円",
     options: [
-      "営業利益 2,250,000　限界利益 1,975,000",
-      "営業利益 1,975,000　限界利益 2,250,000",
-      "営業利益 2,400,000　限界利益 1,975,000",
-      "営業利益 1,975,000　限界利益 2,400,000"
+      "営業利益 2,250,000 限界利益 1,975,000",
+      "営業利益 1,975,000 限界利益 2,250,000",
+      "営業利益 2,400,000 限界利益 1,975,000",
+      "営業利益 1,975,000 限界利益 2,400,000"
     ],
     answer: 3,
-    explanation: "【解答】エ\n限界利益 ＝ 売上高 － すべての変動費\n限界利益 ＝ 5,000,000 － 2,450,000 － 150,000 ＝ 2,400,000円\n営業利益 ＝ 限界利益 － すべての固定費\n営業利益 ＝ 2,400,000 － 300,000 － 125,000 ＝ 1,975,000円"
+    explanation: "【解答】エ\n1. 限界利益 ＝ 売上高 － すべての変動費 (変動製造費用 ＋ 変動販売費)\n   限界利益 ＝ 5,000,000 － (2,450,000 ＋ 150,000) ＝ 2,400,000 円\n2. 営業利益 ＝ 限界利益 － すべての固定費 (固定製造費用 ＋ 固定販売費)\n   営業利益 ＝ 2,400,000 － (300,000 ＋ 125,000) ＝ 1,975,000 円\nしたがって、営業利益 1,975,000、限界利益 2,400,000 となります。"
   }
 ];
 
@@ -317,7 +591,6 @@ export default function App() {
     setShowHistory(false);
     setShowResumeDialog(false);
 
-    // 進捗リセット
     const newUserData = { ...userData, progressIndex: 0, progressMode: mode };
     setUserData(newUserData);
     saveData({ progressIndex: 0, progressMode: mode });
@@ -331,7 +604,6 @@ export default function App() {
     else if (mode === "review") filtered = quizData.filter(q => userData.reviewList?.includes(q.id));
 
     if (filtered.length === 0 || userData.progressIndex >= filtered.length) {
-       // 万が一状態がおかしい場合は最初から
        startMode("all");
        return;
     }
@@ -367,10 +639,6 @@ export default function App() {
       newWrongList = newWrongList.filter(id => id !== currentQ.id);
     }
 
-    // 次に進むべきインデックスを保存
-    const nextProgressIndex = currentIndex; // とりあえず現在のインデックス（次回開いた時はここからリトライでも良いし、次へ進めても良い。ここでは現在の問題を完了したとして次に進む状態を保存するか、現在の状態を保存するか）
-    // 仕様：解答するたびにprogressIndexを保存。次の問題への遷移は「次へ」ボタンで行う。
-
     const newUserData = { 
       ...userData, 
       wrongList: newWrongList,
@@ -393,7 +661,6 @@ export default function App() {
       setUserData(newUserData);
       saveData({ progressIndex: nextIdx });
     } else {
-      // 完走
       alert("すべての問題を終了しました！");
       const newUserData = { ...userData, progressIndex: 0, progressMode: "" };
       setUserData(newUserData);
@@ -420,7 +687,6 @@ export default function App() {
   };
 
   const goHome = () => {
-    // 途中離脱時も進捗は保存されている前提
     setActiveQuestions([]);
     setCurrentMode("");
     setShowHistory(false);
@@ -465,7 +731,6 @@ export default function App() {
     );
   }
 
-  // 履歴画面
   if (showHistory) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 pb-20">
@@ -517,7 +782,6 @@ export default function App() {
     );
   }
 
-  // 再開ダイアログ
   if (showResumeDialog) {
     const modeName = userData.progressMode === "all" ? "すべての問題" : userData.progressMode === "wrong" ? "前回不正解のみ" : "要復習のみ";
     return (
@@ -542,17 +806,16 @@ export default function App() {
     );
   }
 
-  // スタート画面
   if (activeQuestions.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 pb-20">
         <header className="flex justify-between items-center mb-8 pt-4">
           <h1 className="text-xl font-bold text-gray-800 flex items-center">
             <BookOpen className="w-6 h-6 mr-2 text-blue-600" />
-            原価計算
+            原価計算 スマート問題集
           </h1>
           <button onClick={() => setShowHistory(true)} className="text-sm font-bold text-blue-600 hover:underline flex items-center">
-            <BarChart2 className="w-4 h-4 mr-1" /> 履歴
+            <BarChart2 className="w-4 h-4 mr-1" /> 履歴一覧
           </button>
         </header>
 
@@ -573,7 +836,6 @@ export default function App() {
     );
   }
 
-  // クイズ画面
   const currentQ = activeQuestions[currentIndex];
   const isCorrectAnswer = selectedOption === currentQ.answer;
   const isReview = userData.reviewList?.includes(currentQ.id);
@@ -596,9 +858,17 @@ export default function App() {
 
       <main className="flex-grow p-4 max-w-2xl mx-auto w-full pb-24">
         {/* 問題文 */}
-        <div className="bg-white p-5 rounded-xl shadow-sm mb-6 whitespace-pre-wrap leading-relaxed text-gray-800 border-l-4 border-blue-500">
+        <div className="bg-white p-5 rounded-xl shadow-sm mb-4 whitespace-pre-wrap leading-relaxed text-gray-800 border-l-4 border-blue-500">
+          <div className="text-xs text-gray-400 font-bold mb-1">【問題概要】 {currentQ.title}</div>
           {currentQ.question}
         </div>
+
+        {/* 【画像代替】HTML/CSSでの図表・テーブルの再現差し込み */}
+        {currentQ.renderCustomUI && (
+          <div className="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-200">
+            {currentQ.renderCustomUI()}
+          </div>
+        )}
 
         {/* 選択肢 */}
         <div className="space-y-3">
@@ -609,11 +879,11 @@ export default function App() {
               btnClass += "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50";
             } else {
               if (idx === currentQ.answer) {
-                btnClass += "bg-green-50 border-green-500 text-green-800"; // 正解
+                btnClass += "bg-green-50 border-green-500 text-green-800";
               } else if (idx === selectedOption) {
-                btnClass += "bg-red-50 border-red-500 text-red-800"; // 選んだ不正解
+                btnClass += "bg-red-50 border-red-500 text-red-800";
               } else {
-                btnClass += "bg-gray-50 border-gray-200 opacity-50"; // その他
+                btnClass += "bg-gray-50 border-gray-200 opacity-50";
               }
             }
 
@@ -634,7 +904,7 @@ export default function App() {
           })}
         </div>
 
-        {/* 解説 */}
+        {/* 解答・解説 */}
         {isAnswered && (
           <div className="mt-8 animate-fade-in-up">
             <div className={`p-4 rounded-t-xl font-bold flex items-center ${isCorrectAnswer ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
@@ -650,11 +920,11 @@ export default function App() {
                 <label className="flex items-center cursor-pointer text-gray-600 hover:text-yellow-600 transition">
                   <input 
                     type="checkbox" 
-                    className="w-5 h-5 mr-2 rounded text-yellow-500 focus:ring-yellow-500"
+                    className="w-5 h-5 mr-2 rounded text-yellow-500 focus:ring-yellow-500 cursor-pointer"
                     checked={isReview || false}
                     onChange={toggleReview}
                   />
-                  <span className="font-bold">要復習にする</span>
+                  <span className="font-bold">この問題を「要復習」に追加</span>
                 </label>
               </div>
             </div>
@@ -662,14 +932,14 @@ export default function App() {
         )}
       </main>
 
-      {/* フローティング「次へ」ボタン */}
+      {/* フローティングナビゲーション */}
       {isAnswered && (
-        <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-200 shadow-lg">
           <button 
             onClick={handleNext}
             className="w-full max-w-2xl mx-auto flex justify-center items-center bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-md"
           >
-            {currentIndex < activeQuestions.length - 1 ? '次の問題へ' : '結果を見る'}
+            {currentIndex < activeQuestions.length - 1 ? '次の問題へ' : '結果を確定して終了'}
             <ChevronRight className="w-5 h-5 ml-1" />
           </button>
         </div>
